@@ -68,7 +68,7 @@ struct CookiePasteSheet: View {
                         .padding(.vertical, 14)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(parsed.isEmpty)
+                .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .padding()
             }
             .navigationTitle("تسجيل عبر الكوكيز")
