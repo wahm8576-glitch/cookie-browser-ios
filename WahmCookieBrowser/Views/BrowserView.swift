@@ -12,6 +12,7 @@ struct BrowserView: View {
     @State private var toast: Toast?
     @State private var isLoggingIn = false
     @State private var toastTask: Task<Void, Never>?
+    @State private var chromeVisible = true
 
     init(container: BrowserContainer) {
         self.container = container
@@ -20,18 +21,30 @@ struct BrowserView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            addressBar
-            cookieBar
-            QuickLaunchBar { item in
-                openShortcut(item)
+            if chromeVisible {
+                VStack(spacing: 0) {
+                    addressBar
+                    cookieBar
+                    QuickLaunchBar { item in
+                        openShortcut(item)
+                    }
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
-            progressBar
-            ZStack {
+
+            ZStack(alignment: .top) {
                 WebViewRepresentable(webView: engine.webView)
                     .environment(\.layoutDirection, .leftToRight)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea(edges: chromeVisible ? .bottom : [.top, .bottom])
 
-                if engine.currentURL == nil && !engine.isLoading && engine.lastErrorMessage == nil {
+                if engine.isLoading || (engine.progress > 0 && engine.progress < 1) {
+                    ProgressView(value: min(max(engine.progress, 0.05), 1), total: 1)
+                        .progressViewStyle(.linear)
+                        .tint(Color.accentColor)
+                }
+
+                if engine.currentURL == nil && !engine.isLoading && engine.lastErrorMessage == nil && chromeVisible {
                     emptyState
                         .allowsHitTesting(false)
                 }
@@ -47,11 +60,16 @@ struct BrowserView: View {
                 if let toast {
                     VStack {
                         toastBanner(toast)
-                            .padding(.top, 10)
+                            .padding(.top, showChromeToggle ? 44 : 10)
                         Spacer()
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .allowsHitTesting(false)
+                }
+
+                if showChromeToggle {
+                    chromeToggle
+                        .padding(.top, 8)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -60,6 +78,8 @@ struct BrowserView: View {
         .background(Color(uiColor: .systemBackground))
         .navigationTitle(engine.pageTitle.isEmpty ? container.name : engine.pageTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(chromeVisible ? .visible : .hidden, for: .navigationBar)
+        .toolbar(chromeVisible ? .visible : .hidden, for: .bottomBar)
         .toolbar {
             ToolbarItemGroup(placement: .bottomBar) {
                 Button {
@@ -99,18 +119,64 @@ struct BrowserView: View {
             }
             .environment(\.layoutDirection, .rightToLeft)
         }
+        .animation(.easeInOut(duration: 0.32), value: chromeVisible)
         .animation(.spring(duration: 0.35), value: toast?.id)
         .animation(.easeInOut(duration: 0.2), value: isLoggingIn)
         .onChange(of: engine.currentURL) { _, newURL in
             store.updateLastURL(container.id, url: newURL)
+            if newURL != nil {
+                collapseChrome()
+            }
         }
         .onAppear {
             if engine.addressText.isEmpty, let last = container.lastURLString {
                 engine.addressText = last
             }
+            if container.lastURL != nil || engine.currentURL != nil {
+                chromeVisible = false
+            }
         }
         .onDisappear {
             toastTask?.cancel()
+        }
+    }
+
+    private var showChromeToggle: Bool {
+        engine.currentURL != nil || engine.isLoading || !chromeVisible
+    }
+
+    private var chromeToggle: some View {
+        Button {
+            toggleChrome()
+        } label: {
+            Image(systemName: chromeVisible ? "chevron.up" : "chevron.down")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 38, height: 28)
+                .background(.black.opacity(0.40), in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.28), lineWidth: 0.6))
+                .shadow(color: .black.opacity(0.28), radius: 5, y: 1)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(chromeVisible ? "إخفاء الشريط" : "إظهار الشريط")
+        .frame(maxWidth: .infinity, alignment: .top)
+    }
+
+    private func collapseChrome() {
+        addressFocused = false
+        hideKeyboard()
+        withAnimation(.easeInOut(duration: 0.32)) {
+            chromeVisible = false
+        }
+    }
+
+    private func toggleChrome() {
+        if chromeVisible {
+            addressFocused = false
+            hideKeyboard()
+        }
+        withAnimation(.easeInOut(duration: 0.32)) {
+            chromeVisible.toggle()
         }
     }
 
@@ -257,20 +323,19 @@ struct BrowserView: View {
     }
 
     private func openShortcut(_ item: QuickLaunchItem) {
-        addressFocused = false
-        hideKeyboard()
         engine.addressText = item.url.absoluteString
         engine.load(url: item.url)
+        collapseChrome()
     }
 
     private func go() {
-        addressFocused = false
-        hideKeyboard()
         let raw = engine.addressText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !raw.isEmpty else { return }
         if !engine.submitAddress() {
             showToast(Toast(kind: .failure, message: "تعذر التعرف على الرابط"))
+            return
         }
+        collapseChrome()
     }
 
     private func hideKeyboard() {
@@ -307,6 +372,7 @@ struct BrowserView: View {
             if let url = engine.suggestedURLFromCookies(cookies) {
                 engine.addressText = url.absoluteString
                 engine.load(url: url)
+                collapseChrome()
                 _ = await engine.waitForNavigation(timeout: 12)
             }
         }

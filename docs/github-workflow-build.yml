@@ -120,12 +120,12 @@ jobs:
             --notes "$NOTES" \
             || true
 
-          # Versioned tag with a brand-new download URL (requested for v2).
-          if gh release view v2 >/dev/null 2>&1; then
-            gh release upload v2 WahmCookieBrowser.ipa --clobber
-            gh release edit v2 --title "Unsigned IPA v2" --notes "$NOTES"
+          # Unique versioned tag for this release (do not reuse v2).
+          if gh release view v3 >/dev/null 2>&1; then
+            gh release upload v3 WahmCookieBrowser.ipa --clobber
+            gh release edit v3 --title "Unsigned IPA v3" --notes "$NOTES"
           else
-            gh release create v2 WahmCookieBrowser.ipa \
-              --title "Unsigned IPA v2" \
+            gh release create v3 WahmCookieBrowser.ipa \
+              --title "Unsigned IPA v3" \
               --notes "$NOTES"
           fi

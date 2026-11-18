@@ -11,9 +11,9 @@
 
 ملف IPA غير موقّع (رابط مباشر):
 
-**https://github.com/wahm8576-glitch/cookie-browser-ios/releases/download/v2/WahmCookieBrowser.ipa**
+**https://github.com/wahm8576-glitch/cookie-browser-ios/releases/download/v3/WahmCookieBrowser.ipa**
 
-(نسخة v2 — رابط جديد. النسخة السابقة كانت على `unsigned-latest`.)
+(نسخة v3 — رابط جديد. النسخ السابقة: `v2` و `unsigned-latest`.)
 
 وقّع الملف بنفسك عبر Esign أو Sideloadly أو AltStore ثم ثبّته على جهازك.
 
