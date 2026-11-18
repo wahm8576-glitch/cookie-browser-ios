@@ -17,6 +17,8 @@
 		46EF4183EA505D9E803AA798 /* BrowserEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D988F8F8FD5210863CF2C2 /* BrowserEngine.swift */; };
 		EA3C127C9D38579F8B3EDB07 /* WebViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7D97603DF7542095240039 /* WebViewRepresentable.swift */; };
 		59EAC18D5AA255A690485398 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F634DB6E6CE55FC188A1BBEB /* Assets.xcassets */; };
+		27DB7E87B0EB552FA13E0AAA /* BannerAutoDismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95570A74D1935DD6B868D338 /* BannerAutoDismiss.swift */; };
+		72E54851C6895DB58CF430CC /* QuickLaunchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E631C62B9255CB1B33B66C8 /* QuickLaunchBar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		C721EDCC89535F838ED67570 /* WahmCookieBrowserApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WahmCookieBrowserApp.swift; sourceTree = "<group>"; };
 		D3D988F8F8FD5210863CF2C2 /* BrowserEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserEngine.swift; sourceTree = "<group>"; };
 		DD7D97603DF7542095240039 /* WebViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewRepresentable.swift; sourceTree = "<group>"; };
+		95570A74D1935DD6B868D338 /* BannerAutoDismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerAutoDismiss.swift; sourceTree = "<group>"; };
+		3E631C62B9255CB1B33B66C8 /* QuickLaunchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLaunchBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +102,7 @@
 				9559D396A44552AFBB948838 /* BrowserView.swift */,
 				28CE7353F2545C8C858E0B1C /* ContainerListView.swift */,
 				A8E4B5B509BC5F8E847BDE7A /* CookiePasteSheet.swift */,
+				3E631C62B9255CB1B33B66C8 /* QuickLaunchBar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -107,6 +112,7 @@
 			children = (
 				D3D988F8F8FD5210863CF2C2 /* BrowserEngine.swift */,
 				DD7D97603DF7542095240039 /* WebViewRepresentable.swift */,
+				95570A74D1935DD6B868D338 /* BannerAutoDismiss.swift */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -194,9 +200,11 @@
 				59DA147B5B0C5084927929E0 /* BrowserView.swift in Sources */,
 				1F484ADEC312592C886300A6 /* ContainerListView.swift in Sources */,
 				1607CB3AC84151A08B8B538F /* CookiePasteSheet.swift in Sources */,
+				72E54851C6895DB58CF430CC /* QuickLaunchBar.swift in Sources */,
 				8D9604E464AA5B92B02403BF /* WahmCookieBrowserApp.swift in Sources */,
 				46EF4183EA505D9E803AA798 /* BrowserEngine.swift in Sources */,
 				EA3C127C9D38579F8B3EDB07 /* WebViewRepresentable.swift in Sources */,
+				27DB7E87B0EB552FA13E0AAA /* BannerAutoDismiss.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

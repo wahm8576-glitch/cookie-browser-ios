@@ -40,6 +40,7 @@ final class BrowserEngine: NSObject, ObservableObject {
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
         configuration.allowsAirPlayForMediaPlayback = true
         configuration.allowsPictureInPictureMediaPlayback = true
+        BannerAutoDismiss.install(on: configuration)
 
         let webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 700), configuration: configuration)
         webView.allowsBackForwardNavigationGestures = true
@@ -363,6 +364,7 @@ extension BrowserEngine: WKNavigationDelegate {
         canGoForward = webView.canGoForward
         pageTitle = webView.title ?? ""
         markNavigationFinished(failed: false)
+        webView.evaluateJavaScript(BannerAutoDismiss.invokeJavaScript, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

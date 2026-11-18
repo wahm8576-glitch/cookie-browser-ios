@@ -22,6 +22,9 @@ struct BrowserView: View {
         VStack(spacing: 0) {
             addressBar
             cookieBar
+            QuickLaunchBar { item in
+                openShortcut(item)
+            }
             progressBar
             ZStack {
                 WebViewRepresentable(webView: engine.webView)
@@ -251,6 +254,13 @@ struct BrowserView: View {
         .background(toast.kind == .success ? Color.green.opacity(0.92) : Color.red.opacity(0.92), in: Capsule())
         .shadow(color: .black.opacity(0.15), radius: 6, y: 2)
         .padding(.horizontal, 16)
+    }
+
+    private func openShortcut(_ item: QuickLaunchItem) {
+        addressFocused = false
+        hideKeyboard()
+        engine.addressText = item.url.absoluteString
+        engine.load(url: item.url)
     }
 
     private func go() {
