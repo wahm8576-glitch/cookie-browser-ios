@@ -22,6 +22,7 @@ final class BrowserEngine: NSObject, ObservableObject {
     private var lastNavigationFailed = false
     private var didCommitCurrentLoad = false
     private var loadWaiters: [LoadWaiter] = []
+    private var bannerSweepTask: Task<Void, Never>?
 
     private struct LoadWaiter {
         let generation: Int
@@ -151,6 +152,17 @@ final class BrowserEngine: NSObject, ObservableObject {
             }
         }
         return applied
+    }
+
+    private func startBannerSweep() {
+        bannerSweepTask?.cancel()
+        bannerSweepTask = Task { @MainActor in
+            for _ in 0..<24 {
+                try? await Task.sleep(for: .milliseconds(500))
+                if Task.isCancelled { return }
+                self.webView.evaluateJavaScript(BannerAutoDismiss.invokeJavaScript, completionHandler: nil)
+            }
+        }
     }
 
     func reloadAfterCookieInjection() {
@@ -356,6 +368,8 @@ extension BrowserEngine: WKNavigationDelegate {
         didCommitCurrentLoad = true
         showLoadError = false
         updateCurrentURL(webView.url)
+        startBannerSweep()
+        webView.evaluateJavaScript(BannerAutoDismiss.invokeJavaScript, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -364,6 +378,7 @@ extension BrowserEngine: WKNavigationDelegate {
         canGoForward = webView.canGoForward
         pageTitle = webView.title ?? ""
         markNavigationFinished(failed: false)
+        startBannerSweep()
         webView.evaluateJavaScript(BannerAutoDismiss.invokeJavaScript, completionHandler: nil)
     }
 

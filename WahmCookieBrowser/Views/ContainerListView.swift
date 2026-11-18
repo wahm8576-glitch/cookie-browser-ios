@@ -19,7 +19,7 @@ struct ContainerListView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("متصفح وهم")
+                    Text("متصفح وهم  v2")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }

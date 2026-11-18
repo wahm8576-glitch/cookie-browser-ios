@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct QuickLaunchItem: Identifiable, Hashable {
     let id: String
@@ -28,26 +29,48 @@ enum QuickLaunch {
 struct QuickLaunchBar: View {
     var onSelect: (QuickLaunchItem) -> Void
 
+    private let columns = [
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8),
+        GridItem(.flexible(), spacing: 8)
+    ]
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("اختصارات")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 14)
+
+            LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(QuickLaunch.items) { item in
                     Button {
                         onSelect(item)
                     } label: {
-                        Label(item.title, systemImage: item.symbol)
-                            .font(.caption.weight(.semibold))
-                            .padding(.horizontal, 11)
-                            .padding(.vertical, 7)
-                            .foregroundStyle(.primary)
-                            .background(Color(uiColor: .secondarySystemBackground), in: Capsule())
+                        VStack(spacing: 4) {
+                            Image(systemName: item.symbol)
+                                .font(.body.weight(.semibold))
+                            Text(item.title)
+                                .font(.caption2.weight(.bold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(
+                            Color.accentColor.opacity(0.14),
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
+                        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                     .accessibilityLabel(item.title)
                 }
             }
             .padding(.horizontal, 12)
         }
         .padding(.bottom, 8)
+        // Explicit height so the bar cannot collapse to 0 in a VStack.
+        .frame(maxWidth: .infinity)
     }
 }
