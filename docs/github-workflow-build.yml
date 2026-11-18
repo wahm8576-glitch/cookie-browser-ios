@@ -1,0 +1,118 @@
+name: Build unsigned IPA
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build unsigned IPA
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          echo "Available Xcode apps:"
+          ls /Applications | grep -i xcode || true
+          xcode-select -p || true
+          # Prefer a recent Xcode that ships an iOS 17+ SDK.
+          for candidate in \
+            /Applications/Xcode_16.4.app \
+            /Applications/Xcode_16.3.app \
+            /Applications/Xcode_16.2.app \
+            /Applications/Xcode_16.1.app \
+            /Applications/Xcode_16.0.app \
+            /Applications/Xcode_16.app \
+            /Applications/Xcode_15.4.app \
+            /Applications/Xcode.app
+          do
+            if [ -d "$candidate" ]; then
+              sudo xcode-select -s "$candidate/Contents/Developer"
+              echo "Selected $candidate"
+              break
+            fi
+          done
+          xcodebuild -version
+          xcodebuild -showsdks
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build (unsigned)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project WahmCookieBrowser.xcodeproj \
+            -scheme WahmCookieBrowser \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            build
+
+      - name: Package IPA
+        run: |
+          set -euo pipefail
+          APP=$(find build/Build/Products/Release-iphoneos -name '*.app' -maxdepth 1 | head -n 1)
+          if [ -z "$APP" ]; then
+            echo "Could not find built .app"
+            find build -name '*.app' -o -name '*.ipa' | head -50
+            exit 1
+          fi
+          echo "Found app: $APP"
+          rm -rf Payload WahmCookieBrowser.ipa
+          mkdir Payload
+          cp -R "$APP" Payload/
+          zip -r -y WahmCookieBrowser.ipa Payload
+          ls -lh WahmCookieBrowser.ipa
+          unzip -l WahmCookieBrowser.ipa | head
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WahmCookieBrowser-unsigned-ipa
+          path: WahmCookieBrowser.ipa
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NOTES="IPA غير موقّع لتطبيق متصفح وهم (WahmCookieBrowser).
+
+          وقّعه بنفسك عبر Esign أو Sideloadly أو AltStore.
+
+          البناء رقم ${{ github.run_number }} — الالتزام ${{ github.sha }}"
+
+          # Stable direct-download tag, replaced on every successful build.
+          if gh release view unsigned-latest >/dev/null 2>&1; then
+            gh release upload unsigned-latest WahmCookieBrowser.ipa --clobber
+            gh release edit unsigned-latest --notes "$NOTES"
+          else
+            gh release create unsigned-latest WahmCookieBrowser.ipa \
+              --title "Unsigned IPA (latest)" \
+              --notes "$NOTES"
+          fi
+
+          # Keep a unique copy for this run as well.
+          gh release create "build-${{ github.run_number }}" WahmCookieBrowser.ipa \
+            --title "Unsigned IPA (build ${{ github.run_number }})" \
+            --notes "$NOTES" \
+            || true
