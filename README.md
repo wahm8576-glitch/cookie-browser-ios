@@ -7,15 +7,13 @@
 - يتطلب iOS 17 أو أحدث
 - بدون مكتبات خارجية
 
-## التحميل (IPA غير موقّع)
+## التحميل
 
-بعد إضافة مسار GitHub Actions (ملف `docs/github-workflow-build.yml` يُنسخ إلى `.github/workflows/build.yml`) سيظهر رابط تحميل مباشر:
+ملف IPA غير موقّع (رابط مباشر):
 
 **https://github.com/wahm8576-glitch/cookie-browser-ios/releases/download/unsigned-latest/WahmCookieBrowser.ipa**
 
 وقّع الملف بنفسك عبر Esign أو Sideloadly أو AltStore ثم ثبّته على جهازك.
-
-> ملاحظة: أول رفع للمستودع تم بدون ملف الـworkflow لأن توكن GitHub الحالي لا يملك صلاحية `workflow`. انسخ الملف من `docs/github-workflow-build.yml` إلى `.github/workflows/build.yml` ثم ادفعه بحساب يملك هذه الصلاحية، أو أعد توثيق `gh` بالصلاحيات `repo,workflow`.
 
 ## الفكرة
 
